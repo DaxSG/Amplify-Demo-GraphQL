@@ -14,6 +14,12 @@
     "categories": {
       "auth": {
         "amplifydemographqlbba37ebd": {}
+      },
+      "api": {
+        "amplifydemographql": {}
+      },
+      "storage": {
+        "imagestorage": {}
       }
     }
   }
