@@ -25,24 +25,24 @@ export default function NoteCreateForm(props) {
   const initialValues = {
     name: "",
     description: "",
-    image: "",
+    csvFile: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [description, setDescription] = React.useState(
     initialValues.description
   );
-  const [image, setImage] = React.useState(initialValues.image);
+  const [csvFile, setCsvFile] = React.useState(initialValues.csvFile);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setName(initialValues.name);
     setDescription(initialValues.description);
-    setImage(initialValues.image);
+    setCsvFile(initialValues.csvFile);
     setErrors({});
   };
   const validations = {
     name: [{ type: "Required" }],
     description: [],
-    image: [],
+    csvFile: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -72,7 +72,7 @@ export default function NoteCreateForm(props) {
         let modelFields = {
           name,
           description,
-          image,
+          csvFile,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -137,7 +137,7 @@ export default function NoteCreateForm(props) {
             const modelFields = {
               name: value,
               description,
-              image,
+              csvFile,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -163,7 +163,7 @@ export default function NoteCreateForm(props) {
             const modelFields = {
               name,
               description: value,
-              image,
+              csvFile,
             };
             const result = onChange(modelFields);
             value = result?.description ?? value;
@@ -179,30 +179,30 @@ export default function NoteCreateForm(props) {
         {...getOverrideProps(overrides, "description")}
       ></TextField>
       <TextField
-        label="Image"
+        label="Csv file"
         isRequired={false}
         isReadOnly={false}
-        value={image}
+        value={csvFile}
         onChange={(e) => {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
               name,
               description,
-              image: value,
+              csvFile: value,
             };
             const result = onChange(modelFields);
-            value = result?.image ?? value;
+            value = result?.csvFile ?? value;
           }
-          if (errors.image?.hasError) {
-            runValidationTasks("image", value);
+          if (errors.csvFile?.hasError) {
+            runValidationTasks("csvFile", value);
           }
-          setImage(value);
+          setCsvFile(value);
         }}
-        onBlur={() => runValidationTasks("image", image)}
-        errorMessage={errors.image?.errorMessage}
-        hasError={errors.image?.hasError}
-        {...getOverrideProps(overrides, "image")}
+        onBlur={() => runValidationTasks("csvFile", csvFile)}
+        errorMessage={errors.csvFile?.errorMessage}
+        hasError={errors.csvFile?.hasError}
+        {...getOverrideProps(overrides, "csvFile")}
       ></TextField>
       <Flex
         justifyContent="space-between"

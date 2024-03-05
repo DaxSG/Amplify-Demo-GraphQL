@@ -10,7 +10,7 @@ export const createNote = /* GraphQL */ `
       id
       name
       description
-      image
+      csvFile
       createdAt
       updatedAt
       __typename
@@ -26,7 +26,7 @@ export const updateNote = /* GraphQL */ `
       id
       name
       description
-      image
+      csvFile
       createdAt
       updatedAt
       __typename
@@ -42,7 +42,7 @@ export const deleteNote = /* GraphQL */ `
       id
       name
       description
-      image
+      csvFile
       createdAt
       updatedAt
       __typename
