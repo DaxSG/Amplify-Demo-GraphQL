@@ -22,9 +22,9 @@ import { uploadData, getUrl, remove } from 'aws-amplify/storage';
 const client = generateClient();
 
 const App = ({ signOut }) => {
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState([]); //initialize as an empty array
 
-  useEffect(() => {
+  useEffect(() => { //fetch notes when component loads initially
     fetchNotes();
   }, []);
 
@@ -76,7 +76,7 @@ const App = ({ signOut }) => {
 
   return (
     <View className="App">
-      <Heading level={1}>My Notes App</Heading>
+      <Heading level={1}>EEG Data Visualization Demo</Heading>
       <View as="form" margin="3rem 0" onSubmit={createNote}>
         <Flex direction="row" justifyContent="center">
           <TextField
@@ -106,7 +106,7 @@ const App = ({ signOut }) => {
           </Button>
         </Flex>
       </View>
-      <Heading level={2}>Current Notes</Heading>
+      <Heading level={2}>List of EEG Data</Heading>
       <View margin="3rem 0">
         {notes.map((note) => (
           <Flex
