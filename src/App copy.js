@@ -7,6 +7,7 @@ import {
   Heading,
   Text,
   TextField,
+  Image,
   View,
   withAuthenticator,
 } from "@aws-amplify/ui-react";
@@ -21,9 +22,9 @@ import { uploadData, getUrl, remove } from 'aws-amplify/storage';
 const client = generateClient();
 
 const App = ({ signOut }) => {
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState([]); //initialize as an empty array
 
-  useEffect(() => {
+  useEffect(() => { //fetch notes when component loads initially
     fetchNotes();
   }, []);
 
@@ -32,9 +33,9 @@ const App = ({ signOut }) => {
     const notesFromAPI = apiData.data.listNotes.items;
     await Promise.all(
       notesFromAPI.map(async (note) => {
-        if (note.csvFile) {
-          const url = await getUrl({ key: note.csvFile.key });
-          note.csvFileUrl = url; // Store the URL for the CSV file
+        if (note.image) {
+          const url = await getUrl({ key: note.name });
+          note.image = url.url;  
         }
         return note;
       })
@@ -45,16 +46,15 @@ const App = ({ signOut }) => {
   async function createNote(event) {
     event.preventDefault();
     const form = new FormData(event.target);
-    const csvFile = form.get("csvFile");
+    const image = form.get("image");
     const data = {
       name: form.get("name"),
       description: form.get("description"),
-      // Assuming the backend is configured to handle this correctly
-      csvFile: csvFile ? { bucket: 'YourS3BucketName', key: `${form.get("name")}.csv`, region: 'YourS3BucketRegion' } : null,
+      image: image.name,
     };
-    if (csvFile) await uploadData({
+    if (!!data.image) await uploadData({
       key: data.name,
-      data: csvFile
+      data: image
     });
     await client.graphql({
       query: createNoteMutation,
@@ -96,10 +96,9 @@ const App = ({ signOut }) => {
             required
           />
           <View
+            name="image"
             as="input"
             type="file"
-            accept=".csv"
-            name="csvFile" // Changed from 'image' to 'csvFile'
             style={{ alignSelf: "end" }}
           />
           <Button type="submit" variation="primary">
@@ -120,13 +119,12 @@ const App = ({ signOut }) => {
               {note.name}
             </Text>
             <Text as="span">{note.description}</Text>
-            {/* Button for CSV file, replacing the Image component */}
-            {note.csvFileUrl && (
-              <Button onClick={() => {/* Placeholder for modal trigger */}}>
-                View Data
-              </Button>
-              // Add a comment here where you would implement the functionality for displaying the Plotly plot
-              // Implement Plotly plot visualization inside a modal here
+            {note.image && (
+              <Image
+                src={note.image}
+                alt={`visual aid for ${notes.name}`}
+                style={{ width: 400 }}
+              />
             )}
             <Button variation="link" onClick={() => deleteNote(note)}>
               Delete note
