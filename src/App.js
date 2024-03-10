@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import "@aws-amplify/ui-react/styles.css";
+import MyPlot from './components/MyPlot';
+import Modal from 'react-modal';
 import {
   Button,
   Flex,
@@ -18,9 +20,26 @@ import {
 import { generateClient } from 'aws-amplify/api';
 import { uploadData, getUrl, remove } from 'aws-amplify/storage';
 
+import SiteFooter from './components/SiteFooter';
+
 const client = generateClient();
 
 const App = ({ signOut }) => {
+
+  Modal.setAppElement('#root');
+
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedDataFile, setSelectedDataFile] = useState('');
+
+  const openModal = (url) => {
+    setSelectedDataFile(url); // Now expects a URL
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
+
   const [notes, setNotes] = useState([]);
 
   useEffect(() => {
@@ -33,8 +52,8 @@ const App = ({ signOut }) => {
     await Promise.all(
       notesFromAPI.map(async (note) => {
         if (note.csvFile) {
-          const url = await getUrl({ key: note.csvFile.key });
-          note.csvFileUrl = url; // Store the URL for the CSV file
+          const url = await getUrl({ key: note.name });
+          note.csvFile = url.url; // Store the URL for the CSV file
         }
         return note;
       })
@@ -49,8 +68,7 @@ const App = ({ signOut }) => {
     const data = {
       name: form.get("name"),
       description: form.get("description"),
-      // Assuming the backend is configured to handle this correctly
-      csvFile: csvFile ? { bucket: 'YourS3BucketName', key: `${form.get("name")}.csv`, region: 'YourS3BucketRegion' } : null,
+      csvFile: csvFile.name,
     };
     if (csvFile) await uploadData({
       key: data.name,
@@ -75,67 +93,81 @@ const App = ({ signOut }) => {
   }
 
   return (
-    <View className="App">
-      <Heading level={1}>EEG Data Visualization Demo</Heading>
-      <View as="form" margin="3rem 0" onSubmit={createNote}>
-        <Flex direction="row" justifyContent="center">
-          <TextField
-            name="name"
-            placeholder="Note Name"
-            label="Note Name"
-            labelHidden
-            variation="quiet"
-            required
-          />
-          <TextField
-            name="description"
-            placeholder="Note Description"
-            label="Note Description"
-            labelHidden
-            variation="quiet"
-            required
-          />
-          <View
-            as="input"
-            type="file"
-            accept=".csv"
-            name="csvFile" // Changed from 'image' to 'csvFile'
-            style={{ alignSelf: "end" }}
-          />
-          <Button type="submit" variation="primary">
-            Create Note
-          </Button>
+    <div className="site-container" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <View className="App" style={{ flex: '1', textAlign: 'left' }}>
+        <Flex direction="row" justifyContent="space-between" alignItems="center" style={{ color: 'white', backgroundColor: "#2f768a", padding: '20px' }}>
+          <Heading level={1} style = {{color: 'white'}}>
+            EEG Data Visualization Demo
+          </Heading>
+          <Button onClick={signOut} style={{backgroundColor: 'white'}}>Sign Out</Button>
         </Flex>
-      </View>
-      <Heading level={2}>List of EEG Data</Heading>
-      <View margin="3rem 0">
-        {notes.map((note) => (
-          <Flex
-            key={note.id || note.name}
-            direction="row"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Text as="strong" fontWeight={700}>
-              {note.name}
-            </Text>
-            <Text as="span">{note.description}</Text>
-            {/* Button for CSV file, replacing the Image component */}
-            {note.csvFileUrl && (
-              <Button onClick={() => {/* Placeholder for modal trigger */}}>
-                View Data
-              </Button>
-              // Add a comment here where you would implement the functionality for displaying the Plotly plot
-              // Implement Plotly plot visualization inside a modal here
-            )}
-            <Button variation="link" onClick={() => deleteNote(note)}>
-              Delete note
+        <View as="form" margin="3rem 0" onSubmit={createNote}>
+          <Flex direction="column" gap="1rem">
+            <TextField
+              name="name"
+              placeholder="Record Date"
+              label="Note Name"
+              labelHidden
+              variation="quiet"
+              required
+            />
+            <TextField
+              name="description"
+              placeholder="Record Description"
+              label="Note Description"
+              labelHidden
+              variation="quiet"
+              required
+            />
+            <View as="input" type="file" accept=".csv" name="csvFile" style={{ alignSelf: "start" }} />
+            <Button type="submit" variation="primary">
+              Upload EEG Record
             </Button>
           </Flex>
-        ))}
+        </View>
+
+
+<Heading level={2} style={{ textAlign: 'left', margin: '1rem' }}>List of EEG Records </Heading>
+<View style={{ margin: '3rem 1rem' }}>
+  {notes.map((note) => (
+    <Flex 
+      key={note.id || note.name} 
+      direction="row" 
+      justifyContent="flex-start" 
+      alignItems="center" 
+      gap="1rem" 
+      style={{ marginBottom: '1rem' }}
+    >
+      <View style={{ width: '25%', textAlign: 'left', marginLeft: 50 }}>
+        <Text as="strong" fontWeight={700}>
+          {note.name}
+        </Text> 
       </View>
-      <Button onClick={signOut}>Sign Out</Button>
-    </View>
+      <View style={{ width: '25%', textAlign: 'left' }}>
+        <Text as="span">{note.description}</Text>
+      </View>
+      <View style={{ width: '25%', textAlign: 'left' }}>
+        {note.csvFile && (
+          <Button onClick={() => openModal(note.csvFile)} style={{backgroundColor: 'red'}}>View Data</Button>
+        )}
+      </View>
+      <View style={{ width: '25%', textAlign: 'left' }}>
+        <Button variation="link" onClick={() => deleteNote(note)}>Delete Record</Button>
+      </View>
+    </Flex>
+  ))}
+</View>
+
+          
+
+        <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
+        <Button onClick={closeModal} style={{position: 'absolute', top: '10px', right: '100px', fontSize: '20px'}}>Close</Button>
+          <MyPlot dataFile={selectedDataFile} />
+          
+        </Modal>
+      </View>
+      <SiteFooter />
+    </div>
   );
 };
 
