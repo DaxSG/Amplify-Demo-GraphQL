@@ -62,6 +62,7 @@ const App = ({ signOut }) => {
   }
 
   async function createNote(event) {
+    //alert('File size cannot exceed 5GB.');
     event.preventDefault();
     const form = new FormData(event.target);
     const csvFile = form.get("csvFile");
@@ -129,33 +130,56 @@ const App = ({ signOut }) => {
 
 <Heading level={2} style={{ textAlign: 'left', margin: '1rem' }}>List of EEG Records </Heading>
 <View style={{ margin: '3rem 1rem' }}>
-  {notes.map((note) => (
-    <Flex 
-      key={note.id || note.name} 
-      direction="row" 
-      justifyContent="flex-start" 
-      alignItems="center" 
-      gap="1rem" 
-      style={{ marginBottom: '1rem' }}
-    >
-      <View style={{ width: '25%', textAlign: 'left', marginLeft: 50 }}>
-        <Text as="strong" fontWeight={700}>
-          {note.name}
-        </Text> 
-      </View>
-      <View style={{ width: '25%', textAlign: 'left' }}>
-        <Text as="span">{note.description}</Text>
-      </View>
-      <View style={{ width: '25%', textAlign: 'left' }}>
-        {note.csvFile && (
-          <Button onClick={() => openModal(note.csvFile)} style={{backgroundColor: 'red'}}>View Data</Button>
-        )}
-      </View>
-      <View style={{ width: '25%', textAlign: 'left' }}>
-        <Button variation="link" onClick={() => deleteNote(note)}>Delete Record</Button>
-      </View>
-    </Flex>
-  ))}
+{notes.map((note) => (
+  <Flex 
+    key={note.id || note.name} 
+    direction="row" 
+    justifyContent="flex-start" 
+    alignItems="center" 
+    gap="1rem" 
+    style={{ marginBottom: '1rem' }}
+  >
+    <View style={{ width: '25%', textAlign: 'left', marginLeft: 50 }}>
+      <Text as="strong" fontWeight={700}>
+        {note.name}
+      </Text> 
+    </View>
+    <View style={{ width: '25%', textAlign: 'left' }}>
+      <Text as="span">{note.description}</Text>
+    </View>
+    <View style={{ width: '25%', textAlign: 'left' }}>
+  {note.csvFile && (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}> {/* Ensures elements are laid out horizontally with space between */}
+      <a href={note.csvFile} 
+         download={`${note.name.replace(/\s+/g, '_')}.csv`} 
+         style={{
+           padding: '8px 12px', // Standard padding for buttons
+           backgroundColor: '#007bff', 
+           color: 'white', 
+           textDecoration: 'none', 
+           borderRadius: '4px', 
+           display: 'inline-block' // Makes sure it behaves like a button
+         }}>
+        Download CSV
+      </a>
+      <Button onClick={() => openModal(note.csvFile)} 
+              style={{
+                backgroundColor: 'red',
+                padding: '8px 12px' // Ensure consistent padding with the download button
+              }}>
+        View Data
+      </Button>
+    </div>
+  )}
+</View>
+
+    <View style={{ width: '25%', textAlign: 'left' }}>
+      <Button variation="link" onClick={() => deleteNote(note)}>Delete Record</Button>
+    </View>
+  </Flex>
+))}
+
+
 </View>
 
           

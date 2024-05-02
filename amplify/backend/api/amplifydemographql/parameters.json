@@ -2,5 +2,11 @@
   "AppSyncApiName": "amplifydemographql",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
   "DynamoDBEnableServerSideEncryption": false,
-  "AuthModeLastUpdated": "2024-03-03T23:22:58.594Z"
+  "AuthModeLastUpdated": "2024-03-03T23:22:58.594Z",
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authamplifydemographqlbba37ebd",
+      "Outputs.UserPoolId"
+    ]
+  }
 }
